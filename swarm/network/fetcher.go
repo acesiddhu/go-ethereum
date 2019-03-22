@@ -36,9 +36,11 @@ const (
 	maxHopCount uint8 = 20
 )
 
+var RequestTimeout = 10 * time.Second
+
 // Time to consider peer to be skipped.
 // Also used in stream delivery.
-var RequestTimeout = 10 * time.Second
+var PeerSkipDelay = 10 * time.Second
 
 type RequestFunc func(context.Context, *Request) (*enode.ID, chan struct{}, error)
 
@@ -90,7 +92,7 @@ func (r *Request) SkipPeer(nodeID string) bool {
 		return false
 	}
 	t, ok := val.(time.Time)
-	if ok && time.Now().After(t.Add(RequestTimeout)) {
+	if ok && time.Now().After(t.Add(PeerSkipDelay)) {
 		// deadline expired
 		r.peersToSkip.Delete(nodeID)
 		return false
